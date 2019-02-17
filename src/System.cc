@@ -361,10 +361,7 @@ void System::ResetAndLoad(const string &strMapFile)
 
     if (!mapfile.empty())
     {
-        if (LoadMap(mapfile))
-        {
-            // Nothing  
-        }
+        this->LoadMapDuring(mapfile);
     }
     else {
         cout << "No map to load, incorrect file name" << endl;
@@ -577,19 +574,47 @@ vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
 
 void System::SaveMap(const string &filename)
 {
-    unique_lock<mutex> MapPointGlobal(MapPoint::mGlobalMutex);
-    std::ofstream out(filename, std::ios_base::binary);
-    if (!out)
+    // unique_lock<mutex> MapPointGlobal(MapPoint::mGlobalMutex);
+    // std::ofstream out(filename, std::ios_base::binary);
+    // if (!out)
+    // {
+    //     cerr << "Cannot Write to Mapfile: " << mapfile << std::endl;
+    //     exit(-1);
+    // }
+    // cout << "Saving Mapfile: " << mapfile << std::flush;
+    // boost::archive::binary_oarchive oa(out, boost::archive::no_header);
+    // oa << mpMap;
+    // oa << mpKeyFrameDatabase;
+    // cout << " ...done" << std::endl;
+    // out.close();
+
+    if (mTrackingState == 3 || mTrackingState == 2)
     {
-        cerr << "Cannot Write to Mapfile: " << mapfile << std::endl;
-        exit(-1);
+        cout << "Pause the local mapper to save a map" << endl;
+        mpLocalMapper->RequestStop();
+        while (!mpLocalMapper->isStopped())
+        {
+            std::this_thread::sleep_for(std::chrono::microseconds(3000));
+        }
+
+        std::ofstream out(filename, std::ios_base::binary);
+        if (!out)
+        {
+            cerr << "Cannot Write to Mapfile: " << filename << std::endl;
+            exit(-1);
+        }
+        cout << "Saving Mapfile: " << filename << std::flush;
+        boost::archive::binary_oarchive oa(out, boost::archive::no_header);
+        oa << mpMap;
+        oa << mpKeyFrameDatabase;
+        cout << " ... done" << std::endl;
+        out.close();
+        mpLocalMapper->Release();
     }
-    cout << "Saving Mapfile: " << mapfile << std::flush;
-    boost::archive::binary_oarchive oa(out, boost::archive::no_header);
-    oa << mpMap;
-    oa << mpKeyFrameDatabase;
-    cout << " ...done" << std::endl;
-    out.close();
+    else
+    {
+        cout << "ORB-SLAM not initialised. Map not saved." << endl;
+    }
 }
 
 bool System::LoadMap(const string &filename)
@@ -624,6 +649,57 @@ bool System::LoadMap(const string &filename)
     cout << " ...done" << endl;
     in.close();
     return true;
+}
+
+void System::LoadMapDuring(const string &filename)
+{
+    mpLocalMapper->RequestStop();
+    while (!mpLocalMapper->isStopped())
+    {
+        std::this_thread::sleep_for(std::chrono::microseconds(3000));
+    }
+    
+    if(mpViewer)
+    {
+        mpViewer->RequestStop();
+        while(!mpViewer->isStopped())
+        {
+            std::this_thread::sleep_for(std::chrono::microseconds(3000));
+        }
+    }
+
+    std::ifstream in(filename, std::ios_base::binary);
+    if (!in)
+    {
+        cerr << "Cannot Open Mapfile: " << mapfile << " , You need create it first!" << std::endl;
+        return;
+    }
+    cout << "Loading Mapfile: " << mapfile << std::flush;
+    boost::archive::binary_iarchive ia(in, boost::archive::no_header);
+    ia >> mpMap;
+    ia >> mpKeyFrameDatabase;
+
+    mpKeyFrameDatabase->SetORBvocabulary(mpVocabulary);  // set vocabulary file here
+
+    cout << " ...done" << std::endl;
+    cout << "Map Reconstructing" << flush;
+
+    // Initialize all of the keyframes, count how many 
+    vector<ORB_SLAM2::KeyFrame*> vpKFS = mpMap->GetAllKeyFrames();
+    unsigned long mnFrameId = 0;
+    for (auto it:vpKFS) {
+        it->SetORBvocabulary(mpVocabulary);
+        it->ComputeBoW();
+        if (it->mnFrameId > mnFrameId)
+            mnFrameId = it->mnFrameId;
+    }
+    Frame::nNextId = mnFrameId;
+    cout << " ...done" << endl;
+    in.close();
+
+    mpLocalMapper->Release();
+    if(mpViewer)
+        mpViewer->Release();
 }
 
 } //namespace ORB_SLAM

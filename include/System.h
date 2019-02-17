@@ -126,6 +126,7 @@ public:
     // Save/Load functions
     void SaveMap(const string &filename);
     bool LoadMap(const string &filename);
+    void LoadMapDuring(const string &filename);
     
     void SaveManual(const string &strMapFile);
     void ResetAndLoad(const string &strMapFile);
