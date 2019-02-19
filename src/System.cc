@@ -646,6 +646,10 @@ bool System::LoadMap(const string &filename)
             mnFrameId = it->mnFrameId;
     }
     Frame::nNextId = mnFrameId;
+
+    // cout << KeyFrame::nNextId << endl;  // a new numbr
+
+
     cout << " ...done" << endl;
     in.close();
     return true;
@@ -653,6 +657,8 @@ bool System::LoadMap(const string &filename)
 
 void System::LoadMapDuring(const string &filename)
 {
+    //mpTracker->Reset();
+    
     mpLocalMapper->RequestStop();
     while (!mpLocalMapper->isStopped())
     {
@@ -667,6 +673,12 @@ void System::LoadMapDuring(const string &filename)
             std::this_thread::sleep_for(std::chrono::microseconds(3000));
         }
     }
+
+    // unique_lock<mutex> MapPointGlobal(MapPoint::mGlobalMutex);
+    // mpKeyFrameDatabase->clear();
+    // mpMap->clear();
+    // KeyFrame::nNextId = 0;
+    // Frame::nNextId = 0;
 
     std::ifstream in(filename, std::ios_base::binary);
     if (!in)
@@ -693,9 +705,12 @@ void System::LoadMapDuring(const string &filename)
         if (it->mnFrameId > mnFrameId)
             mnFrameId = it->mnFrameId;
     }
-    Frame::nNextId = mnFrameId;
+    Frame::nNextId = mnFrameId;  // Set next frame for camera?
+    // KeyFrame::nNextId = mnFrameId;  // maybe it might be the same?
     cout << " ...done" << endl;
     in.close();
+
+    // cout << KeyFrame::nNextId << endl;  // the same number as before
 
     mpLocalMapper->Release();
     if(mpViewer)

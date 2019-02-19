@@ -55,6 +55,7 @@ int main(int argc, char **argv)
     // Vector for tracking time statistics
     vector<float> vTimesTrack;
     vTimesTrack.resize(nImages);
+    int state = 0;
 
     cout << endl << "-------" << endl;
     cout << "Start processing sequence ..." << endl;
@@ -83,6 +84,8 @@ int main(int argc, char **argv)
 
         // Pass the image to the SLAM system
         SLAM.TrackMonocular(im, tframe);
+        state = SLAM.GetTrackingState();
+        // cout << state << endl;
 
         // int state = SLAM.GetTrackingState();
         // cout << state << endl;
@@ -137,6 +140,8 @@ int main(int argc, char **argv)
 
         // Pass the image to the SLAM system
         SLAM.TrackMonocular(im, tframe);
+        state = SLAM.GetTrackingState();
+        // cout << state << endl;
 
         // int state = SLAM.GetTrackingState();
         // cout << state << endl;
@@ -165,6 +170,59 @@ int main(int argc, char **argv)
     // Save Map
     string anotherSave2 = "saved_maps/map_2.bin";
     SLAM.SaveManual(anotherSave2);
+
+    SLAM.ResetAndLoad(anotherSave);
+    for(int ni=0; ni<nImages; ni++)
+    {
+        // Read image from file
+        im = cv::imread(string(argv[3])+"/"+vstrImageFilenames[ni],CV_LOAD_IMAGE_UNCHANGED);
+        double tframe = vTimestamps[ni];
+
+        if(im.empty())
+        {
+            cerr << endl << "Failed to load image at: "
+                 << string(argv[3]) << "/" << vstrImageFilenames[ni] << endl;
+            return 1;
+        }
+
+#ifdef COMPILEDWITHC11
+        std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+#else
+        std::chrono::monotonic_clock::time_point t1 = std::chrono::monotonic_clock::now();
+#endif
+
+        // Pass the image to the SLAM system
+        SLAM.TrackMonocular(im, tframe);
+        state = SLAM.GetTrackingState();
+        // cout << state << endl;
+
+        // int state = SLAM.GetTrackingState();
+        // cout << state << endl;
+
+#ifdef COMPILEDWITHC11
+        std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+#else
+        std::chrono::monotonic_clock::time_point t2 = std::chrono::monotonic_clock::now();
+#endif
+
+        double ttrack= std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
+
+        vTimesTrack[ni]=ttrack;
+
+        // Wait to load the next frame
+        double T=0;
+        if(ni<nImages-1)
+            T = vTimestamps[ni+1]-tframe;
+        else if(ni>0)
+            T = tframe-vTimestamps[ni-1];
+
+        if(ttrack<T)
+            std::this_thread::sleep_for(std::chrono::microseconds(static_cast<size_t>((T-ttrack)*1e6)));
+    }
+
+    // Save Map
+    string anotherSave3 = "saved_maps/map_3.bin";
+    SLAM.SaveManual(anotherSave3);
 
     // Stop all threads
     SLAM.Shutdown();
