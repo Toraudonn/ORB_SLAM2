@@ -439,6 +439,11 @@ int Optimizer::PoseOptimization(Frame *pFrame)
 
         if(optimizer.edges().size()<10)
             break;
+
+        // Warning from G2O
+        //https://github.com/raulmur/ORB_SLAM2/issues/211
+        if((nInitialCorrespondences-nBad)<5)
+            break;
     }    
 
     // Recover optimized pose and return number of inliers
