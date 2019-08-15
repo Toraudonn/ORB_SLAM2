@@ -74,8 +74,8 @@ target_link_libraries(${PROJECT_NAME}
 ${OpenCV_LIBS}
 ${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
-${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
-${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
+${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.dylib
+${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.dylib
 )
 
 message(STATUS "Compile With map save/load function")
@@ -120,7 +120,7 @@ target_link_libraries(mono_euroc ${PROJECT_NAME})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Vocabulary)
 add_executable(bin_vocabulary Vocabulary/bin_vocabulary.cpp)
-target_link_libraries(bin_vocabulary ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so ${OpenCV_LIBS})
+target_link_libraries(bin_vocabulary ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.dylib ${OpenCV_LIBS})
 
 if(USE_EXAMPLE_WEBCAM)
     find_package(PkgConfig REQUIRED)
@@ -146,8 +146,8 @@ install(TARGETS ${PROJECT_NAME}
     DESTINATION  lib
     COMPONENT library)
 install(FILES
-        ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
-        ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
+        ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.dylib
+        ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.dylib
     DESTINATION lib
     COMPONENT library)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/

@@ -26,6 +26,8 @@
 #include <pangolin/pangolin.h>
 #include <iomanip>
 
+#include <unistd.h>
+
 static bool has_suffix(const std::string &str, const std::string &suffix)
 {
     std::size_t index = str.find(suffix, str.size() - suffix.size());
@@ -128,7 +130,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
         // force slam mode first (replaced bReuseMap with false)
         // turning it to false makes it so that mpActiveLocalizationMode doesn't get turned on 
         mpViewer = new Viewer(this, mpFrameDrawer, mpMapDrawer, mpTracker, strSettingsFile, false);
-        mptViewer = new thread(&Viewer::Run, mpViewer);
+        // mptViewer = new thread(&Viewer::Run, mpViewer);
         mpTracker->SetViewer(mpViewer);
     }
 
@@ -570,6 +572,13 @@ vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
 {
     unique_lock<mutex> lock(mMutexState);
     return mTrackedKeyPointsUn;
+}
+
+//NEW: MACOS
+void System::StartViewer()
+{
+    if (mpViewer)
+        mpViewer->Run();
 }
 
 void System::SaveMap(const string &filename)

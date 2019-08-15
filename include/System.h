@@ -131,6 +131,9 @@ public:
     void SaveManual(const string &strMapFile);
     void ResetAndLoad(const string &strMapFile);
 
+    //NEW: (MACOS)
+    void StartViewer();
+
 private:
 
     // Input sensor
