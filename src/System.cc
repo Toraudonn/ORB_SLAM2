@@ -60,6 +60,8 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     // else if(mSensor==RGBD)
     //     cout << "RGB-D" << endl;
 
+    std::cout << "Start" << std::endl;
+
     //Check settings file
     cv::FileStorage fsSettings(strSettingsFile.c_str(), cv::FileStorage::READ);
     if(!fsSettings.isOpened())
@@ -143,6 +145,8 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
     mpLoopCloser->SetTracker(mpTracker);
     mpLoopCloser->SetLocalMapper(mpLocalMapper);
+
+    std::cout << "Done initializing " << std::endl;
 }
 
 cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp)
