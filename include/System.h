@@ -132,7 +132,7 @@ public:
     void ResetAndLoad(const string &strMapFile);
 
     // Get Map
-    
+    Map* GetMap() { return mpMap; };
 
 private:
 
