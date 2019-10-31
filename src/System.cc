@@ -715,4 +715,6 @@ void System::LoadMapDuring(const string &filename)
         mpViewer->Release();
 }
 
+
+
 } //namespace ORB_SLAM

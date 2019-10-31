@@ -568,7 +568,8 @@ void Tracking::StereoInitialization()
 
 void Tracking::MonocularInitialization()
 {
-
+    // mpInitializer -> NULL or Initializer
+    // check for NULL
     if(!mpInitializer)
     {
         // Set Reference Frame
@@ -603,6 +604,7 @@ void Tracking::MonocularInitialization()
 
         // Find correspondences
         ORBmatcher matcher(0.9,true);
+        // this also fills mvIniMatches
         int nmatches = matcher.SearchForInitialization(mInitialFrame,mCurrentFrame,mvbPrevMatched,mvIniMatches,100);
 
         // Check if there are enough correspondences
@@ -733,7 +735,7 @@ void Tracking::CreateInitialMapMonocular()
 
     mLastFrame = Frame(mCurrentFrame);
 
-    mpMap->SetReferenceMapPoints(mvpLocalMapPoints);
+    mpMap->SetReferenceMapPoints(mvpLocalMapPoints);  //NOTE: based on mInitialFrame I think
 
     mpMapDrawer->SetCurrentCameraPose(pKFcur->GetPose());
 

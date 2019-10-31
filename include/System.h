@@ -131,6 +131,9 @@ public:
     void SaveManual(const string &strMapFile);
     void ResetAndLoad(const string &strMapFile);
 
+    // Get Map
+    
+
 private:
 
     // Input sensor
