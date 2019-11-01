@@ -134,6 +134,8 @@ public:
     long unsigned int mnId;
     const long unsigned int mnFrameId;
 
+    long unsigned int frameId;  //NOTE: added!
+
     const double mTimeStamp;
 
     // Grid (to speed up feature matching)

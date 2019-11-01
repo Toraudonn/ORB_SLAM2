@@ -337,6 +337,7 @@ void System::Reset()
 {
     unique_lock<mutex> lock(mMutexReset);
     mbReset = true;
+    mpTracker->frameId = 0;
 }
 
 void System::SaveManual(const string &strMapFile)
