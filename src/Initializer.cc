@@ -77,8 +77,8 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const vector<int> &vMatc
     // Generate sets of 8 points for each RANSAC iteration
     mvSets = vector< vector<size_t> >(mMaxIterations,vector<size_t>(8,0));
 
-    //DUtils::Random::SeedRandOnce(0); //TODO: change this to set Seed everytime this function is called
-    DUtils::Random::SeedRand(0);  // set the random seed to some value EVERYTIME
+    DUtils::Random::SeedRandOnce(0); //TODO: change this to set Seed everytime this function is called
+    //DUtils::Random::SeedRand(0);  // set the random seed to some value EVERYTIME
 
     for(int it=0; it<mMaxIterations; it++)
     {
